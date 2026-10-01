@@ -1,0 +1,8 @@
+# Add these entries under scrape_configs in prometheus.yml. Replace example hosts and token paths.
+- job_name: octoprint
+  metrics_path: /plugin/prometheus_exporter/metrics
+  authorization:
+    type: Bearer
+    credentials_file: /etc/prometheus/secrets/octoprint-prometheus.token
+  static_configs:
+    - targets: [octoprint.example:5000]

@@ -1,0 +1,890 @@
+{
+  "uid": "octoprint-printer",
+  "title": "OctoPrint Printer",
+  "description": "Printer state, temperatures, live job progress and exporter counters. Print outcomes and completed-print time are counters since the last OctoPrint restart. Active-job timing is shown only when the plugin reports it; no estimate is fabricated.",
+  "tags": [
+    "3d-printing",
+    "octoprint",
+    "printer"
+  ],
+  "schemaVersion": 41,
+  "version": 1,
+  "editable": false,
+  "refresh": "30s",
+  "time": {
+    "from": "now-6h",
+    "to": "now"
+  },
+  "templating": {
+    "list": [
+      {
+        "name": "prometheus_ds",
+        "label": "Prometheus data source",
+        "type": "datasource",
+        "query": "prometheus",
+        "hide": 0,
+        "refresh": 1,
+        "multi": false,
+        "includeAll": false
+      },
+      {
+        "name": "job_octoprint",
+        "label": "Prometheus job: octoprint",
+        "type": "textbox",
+        "query": "octoprint",
+        "hide": 0,
+        "refresh": 0,
+        "multi": false,
+        "includeAll": false,
+        "current": {
+          "text": "octoprint",
+          "value": "octoprint"
+        }
+      },
+      {
+        "name": "instance",
+        "label": "Instance",
+        "type": "query",
+        "query": {
+          "query": "label_values(up{job=\"${job_octoprint}\"}, instance)",
+          "refId": "PrometheusVariableQueryEditor-VariableQuery"
+        },
+        "hide": 0,
+        "refresh": 1,
+        "multi": false,
+        "includeAll": false,
+        "datasource": {
+          "type": "prometheus",
+          "uid": "${prometheus_ds}"
+        }
+      },
+      {
+        "name": "tool_identifier",
+        "label": "Tool temperature identifier",
+        "type": "textbox",
+        "query": "T0",
+        "current": {
+          "text": "T0",
+          "value": "T0"
+        },
+        "hide": 0,
+        "refresh": 0,
+        "multi": false,
+        "includeAll": false
+      },
+      {
+        "name": "bed_identifier",
+        "label": "Bed temperature identifier",
+        "type": "textbox",
+        "query": "B",
+        "current": {
+          "text": "B",
+          "value": "B"
+        },
+        "hide": 0,
+        "refresh": 0,
+        "multi": false,
+        "includeAll": false
+      }
+    ]
+  },
+  "links": [],
+  "panels": [
+    {
+      "id": 1,
+      "type": "stat",
+      "title": "Printer State",
+      "description": "Reported OctoPrint printer state.",
+      "gridPos": {
+        "h": 4,
+        "w": 4,
+        "x": 0,
+        "y": 0
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${prometheus_ds}"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "max by(state_string) (octoprint_printer_state_info{job=\"${job_octoprint}\",instance=\"$instance\"})",
+          "legendFormat": "{{state_string}}",
+          "instant": true,
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${prometheus_ds}"
+          }
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "none",
+          "noValue": "Unavailable"
+        },
+        "overrides": []
+      },
+      "options": {
+        "colorMode": "none",
+        "graphMode": "none",
+        "textMode": "name"
+      }
+    },
+    {
+      "id": 2,
+      "type": "stat",
+      "title": "Print Progress",
+      "description": "Present only when the plugin reports an active job.",
+      "gridPos": {
+        "h": 4,
+        "w": 4,
+        "x": 4,
+        "y": 0
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${prometheus_ds}"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "max(octoprint_print_progress{job=\"${job_octoprint}\",instance=\"$instance\"})",
+          "instant": true,
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${prometheus_ds}"
+          }
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percent",
+          "noValue": "Not reported"
+        },
+        "overrides": []
+      },
+      "options": {
+        "colorMode": "none",
+        "graphMode": "none",
+        "textMode": "value"
+      }
+    },
+    {
+      "id": 3,
+      "type": "stat",
+      "title": "Nozzle Actual",
+      "gridPos": {
+        "h": 4,
+        "w": 4,
+        "x": 8,
+        "y": 0
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${prometheus_ds}"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "octoprint_temperatures_actual{job=\"${job_octoprint}\",instance=\"$instance\",identifier=\"$tool_identifier\"}",
+          "instant": true,
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${prometheus_ds}"
+          }
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "celsius",
+          "noValue": "Not reported"
+        },
+        "overrides": []
+      },
+      "options": {
+        "colorMode": "none",
+        "graphMode": "none",
+        "textMode": "value"
+      }
+    },
+    {
+      "id": 4,
+      "type": "stat",
+      "title": "Bed Actual",
+      "gridPos": {
+        "h": 4,
+        "w": 4,
+        "x": 12,
+        "y": 0
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${prometheus_ds}"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "octoprint_temperatures_actual{job=\"${job_octoprint}\",instance=\"$instance\",identifier=\"$bed_identifier\"}",
+          "instant": true,
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${prometheus_ds}"
+          }
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "celsius",
+          "noValue": "Not reported"
+        },
+        "overrides": []
+      },
+      "options": {
+        "colorMode": "none",
+        "graphMode": "none",
+        "textMode": "value"
+      }
+    },
+    {
+      "id": 5,
+      "type": "stat",
+      "title": "Elapsed Job Time",
+      "description": "Active-job reading only; absent until the plugin emits timing.",
+      "gridPos": {
+        "h": 4,
+        "w": 4,
+        "x": 16,
+        "y": 0
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${prometheus_ds}"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "max(octoprint_print_time_elapsed{job=\"${job_octoprint}\",instance=\"$instance\"})",
+          "instant": true,
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${prometheus_ds}"
+          }
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "s",
+          "noValue": "Not reported"
+        },
+        "overrides": []
+      },
+      "options": {
+        "colorMode": "none",
+        "graphMode": "none",
+        "textMode": "value"
+      }
+    },
+    {
+      "id": 6,
+      "type": "stat",
+      "title": "Estimated Time Left",
+      "description": "OctoPrint estimate, not a guaranteed finish time.",
+      "gridPos": {
+        "h": 4,
+        "w": 4,
+        "x": 20,
+        "y": 0
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${prometheus_ds}"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "max(octoprint_print_time_left_estimate{job=\"${job_octoprint}\",instance=\"$instance\"})",
+          "instant": true,
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${prometheus_ds}"
+          }
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "s",
+          "noValue": "Not reported"
+        },
+        "overrides": []
+      },
+      "options": {
+        "colorMode": "none",
+        "graphMode": "none",
+        "textMode": "value"
+      }
+    },
+    {
+      "id": 7,
+      "type": "timeseries",
+      "title": "Nozzle Temperature",
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 4
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${prometheus_ds}"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "octoprint_temperatures_actual{job=\"${job_octoprint}\",instance=\"$instance\",identifier=\"$tool_identifier\"}",
+          "legendFormat": "Actual",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${prometheus_ds}"
+          }
+        },
+        {
+          "refId": "B",
+          "expr": "octoprint_temperatures_target{job=\"${job_octoprint}\",instance=\"$instance\",identifier=\"$tool_identifier\"}",
+          "legendFormat": "Target",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${prometheus_ds}"
+          }
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "celsius",
+          "custom": {
+            "drawStyle": "line",
+            "lineWidth": 2,
+            "fillOpacity": 12,
+            "showPoints": "never",
+            "spanNulls": false
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      }
+    },
+    {
+      "id": 8,
+      "type": "timeseries",
+      "title": "Bed Temperature",
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 4
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${prometheus_ds}"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "octoprint_temperatures_actual{job=\"${job_octoprint}\",instance=\"$instance\",identifier=\"$bed_identifier\"}",
+          "legendFormat": "Actual",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${prometheus_ds}"
+          }
+        },
+        {
+          "refId": "B",
+          "expr": "octoprint_temperatures_target{job=\"${job_octoprint}\",instance=\"$instance\",identifier=\"$bed_identifier\"}",
+          "legendFormat": "Target",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${prometheus_ds}"
+          }
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "celsius",
+          "custom": {
+            "drawStyle": "line",
+            "lineWidth": 2,
+            "fillOpacity": 12,
+            "showPoints": "never",
+            "spanNulls": false
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      }
+    },
+    {
+      "id": 9,
+      "type": "timeseries",
+      "title": "Print Progress History",
+      "description": "Series disappears when no active job is reported.",
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 12
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${prometheus_ds}"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "max(octoprint_print_progress{job=\"${job_octoprint}\",instance=\"$instance\"})",
+          "legendFormat": "Progress",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${prometheus_ds}"
+          }
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percent",
+          "custom": {
+            "drawStyle": "line",
+            "lineWidth": 2,
+            "fillOpacity": 12,
+            "showPoints": "never",
+            "spanNulls": false
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      }
+    },
+    {
+      "id": 10,
+      "type": "timeseries",
+      "title": "Active Job Timing",
+      "description": "Timing gauges exist only while the plugin emits active-job data.",
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 12
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${prometheus_ds}"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "max(octoprint_print_time_elapsed{job=\"${job_octoprint}\",instance=\"$instance\"})",
+          "legendFormat": "Elapsed",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${prometheus_ds}"
+          }
+        },
+        {
+          "refId": "B",
+          "expr": "max(octoprint_print_time_left_estimate{job=\"${job_octoprint}\",instance=\"$instance\"})",
+          "legendFormat": "Estimated left",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${prometheus_ds}"
+          }
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "s",
+          "custom": {
+            "drawStyle": "line",
+            "lineWidth": 2,
+            "fillOpacity": 12,
+            "showPoints": "never",
+            "spanNulls": false
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      }
+    },
+    {
+      "id": 11,
+      "type": "stat",
+      "title": "Started Since Restart",
+      "gridPos": {
+        "h": 4,
+        "w": 4,
+        "x": 0,
+        "y": 20
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${prometheus_ds}"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "octoprint_started_prints_total{job=\"${job_octoprint}\",instance=\"$instance\"}",
+          "instant": true,
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${prometheus_ds}"
+          }
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "noValue": "Not reported"
+        },
+        "overrides": []
+      },
+      "options": {
+        "colorMode": "none",
+        "graphMode": "none",
+        "textMode": "value"
+      }
+    },
+    {
+      "id": 12,
+      "type": "stat",
+      "title": "Completed Since Restart",
+      "gridPos": {
+        "h": 4,
+        "w": 4,
+        "x": 4,
+        "y": 20
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${prometheus_ds}"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "octoprint_done_prints_total{job=\"${job_octoprint}\",instance=\"$instance\"}",
+          "instant": true,
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${prometheus_ds}"
+          }
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "noValue": "Not reported"
+        },
+        "overrides": []
+      },
+      "options": {
+        "colorMode": "none",
+        "graphMode": "none",
+        "textMode": "value"
+      }
+    },
+    {
+      "id": 13,
+      "type": "stat",
+      "title": "Failed Since Restart",
+      "description": "Plugin counter since OctoPrint restart.",
+      "gridPos": {
+        "h": 4,
+        "w": 4,
+        "x": 8,
+        "y": 20
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${prometheus_ds}"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "octoprint_failed_prints_total{job=\"${job_octoprint}\",instance=\"$instance\"}",
+          "instant": true,
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${prometheus_ds}"
+          }
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "noValue": "Not reported",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 1
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "textMode": "value"
+      }
+    },
+    {
+      "id": 14,
+      "type": "stat",
+      "title": "Cancelled Since Restart",
+      "gridPos": {
+        "h": 4,
+        "w": 4,
+        "x": 12,
+        "y": 20
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${prometheus_ds}"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "octoprint_cancelled_prints_total{job=\"${job_octoprint}\",instance=\"$instance\"}",
+          "instant": true,
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${prometheus_ds}"
+          }
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "noValue": "Not reported"
+        },
+        "overrides": []
+      },
+      "options": {
+        "colorMode": "none",
+        "graphMode": "none",
+        "textMode": "value"
+      }
+    },
+    {
+      "id": 15,
+      "type": "stat",
+      "title": "Completed Print Time",
+      "description": "Accumulated completed-print runtime since OctoPrint restart; not the current job's elapsed time.",
+      "gridPos": {
+        "h": 4,
+        "w": 8,
+        "x": 16,
+        "y": 20
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${prometheus_ds}"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "octoprint_printing_time_total{job=\"${job_octoprint}\",instance=\"$instance\"}",
+          "instant": true,
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${prometheus_ds}"
+          }
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "s",
+          "noValue": "Not reported"
+        },
+        "overrides": []
+      },
+      "options": {
+        "colorMode": "none",
+        "graphMode": "none",
+        "textMode": "value"
+      }
+    },
+    {
+      "id": 16,
+      "type": "timeseries",
+      "title": "Print Outcome Counters",
+      "description": "These counters reset when OctoPrint restarts.",
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 24
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${prometheus_ds}"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "octoprint_started_prints_total{job=\"${job_octoprint}\",instance=\"$instance\"}",
+          "legendFormat": "Started",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${prometheus_ds}"
+          }
+        },
+        {
+          "refId": "B",
+          "expr": "octoprint_done_prints_total{job=\"${job_octoprint}\",instance=\"$instance\"}",
+          "legendFormat": "Completed",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${prometheus_ds}"
+          }
+        },
+        {
+          "refId": "C",
+          "expr": "octoprint_failed_prints_total{job=\"${job_octoprint}\",instance=\"$instance\"}",
+          "legendFormat": "Failed",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${prometheus_ds}"
+          }
+        },
+        {
+          "refId": "D",
+          "expr": "octoprint_cancelled_prints_total{job=\"${job_octoprint}\",instance=\"$instance\"}",
+          "legendFormat": "Cancelled",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${prometheus_ds}"
+          }
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "custom": {
+            "drawStyle": "line",
+            "lineWidth": 2,
+            "fillOpacity": 12,
+            "showPoints": "never",
+            "spanNulls": false
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      }
+    },
+    {
+      "id": 17,
+      "type": "timeseries",
+      "title": "Commanded Print Fan",
+      "description": "Derived from M106/M107 S values (0â€“255); this is commanded PWM, not measured fan RPM.",
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 24
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${prometheus_ds}"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "100 * octoprint_print_fan_speed{job=\"${job_octoprint}\",instance=\"$instance\"} / 255",
+          "legendFormat": "G-code fan command",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${prometheus_ds}"
+          }
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percent",
+          "custom": {
+            "drawStyle": "line",
+            "lineWidth": 2,
+            "fillOpacity": 12,
+            "showPoints": "never",
+            "spanNulls": false
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      }
+    }
+  ]
+}
