@@ -1,17 +1,17 @@
-# octoprint-monitoring — Dashboard Usage
+# Dashboard usage
 
-Import the JSON files using **Grafana → Dashboards → New → Import**. Set the data source and variables listed in [configuration](./configuration.md).
+Import the JSON files using **Grafana → Dashboards → New → Import**. Set the data source and variables listed in [configuration](configuration.md).
 
 ## OctoPrint Printer
 
-Source: [octoprint-printer.json](../dashboards/octoprint-printer.json). Refresh: `30s`.
+Source: [`dashboards/octoprint-printer.json`](https://github.com/willtheorangeguy/octoprint-monitoring/blob/HEAD/dashboards/octoprint-printer.json). Refresh: `30s`.
 
 <!-- Screenshot: after adding octoprint-printer.png to .github/icons/octoprint-monitoring/, replace this comment with ![OctoPrint Printer](https://raw.githubusercontent.com/willtheorangeguy/.github/main/icons/octoprint-monitoring/octoprint-printer.png). -->
 
 ### Panels
 
 | Panel | Type | What it shows |
-|---|---|---|
+| --- | --- | --- |
 | Printer State | stat | Reported OctoPrint printer state. |
 | Print Progress | stat | Present only when the plugin reports an active job. |
 | Nozzle Actual | stat | See the query reference below. |

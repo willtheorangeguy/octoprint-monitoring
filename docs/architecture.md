@@ -1,12 +1,38 @@
-# octoprint-monitoring — Architecture
+# Architecture
 
-OctoPrint plugin /plugin/prometheus_exporter/metrics -> authenticated Prometheus scrape -> Grafana dashboard.
+This project connects its data source to its Grafana dashboard through the components shown below.
+
+## Overview
+
+This diagram shows the data path for this project.
+
+```mermaid
+graph LR
+  A[OctoPrint] -->|exposes metrics through| B[Prometheus Exporter plugin]
+  B -->|scraped by| C[Prometheus]
+  C -->|queried by| D[Grafana dashboard]
+```
 
 ## Components
 
-- [dashboards/](../dashboards): Grafana dashboard definitions
-- [examples/](../examples): deployment and scrape examples
+### Data source
 
-## Data interpretation
+OctoPrint Prometheus Exporter plugin -> authenticated /plugin/prometheus_exporter/metrics scrape -> Prometheus -> Grafana.
 
-Active job timing and progress metrics may be absent while idle. Job outcome counters reset on OctoPrint restart. The fan panel shows commanded PWM derived from M106/M107, not measured RPM.
+### Dashboard
+
+`dashboards/octoprint-printer.json` contains the Grafana dashboard definition.
+
+## Data flow
+
+OctoPrint Prometheus Exporter plugin -> authenticated /plugin/prometheus_exporter/metrics scrape -> Prometheus -> Grafana. Grafana evaluates dashboard queries against the selected data source and label values.
+
+## Directory layout
+
+```text
+.
+├── dashboards/  Grafana dashboard JSON files
+├── examples/  Scrape and deployment examples
+├── docs/        Documentation source
+└── README.md    Project overview and quick links
+```
